@@ -12,8 +12,6 @@ import org.joda.money.Money;
  * 2. 數值比較查詢效率高，支持索引
  * 3. 使用成熟的 Joda Money 庫
  * 4. 精確的金額計算 (分為單位)
- * 
- * @author tw.fengqing.spring.springbucks
  */
 @Converter(autoApply = true)
 public class MoneyConverter implements AttributeConverter<Money, Long> {
