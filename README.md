@@ -1,247 +1,1168 @@
-# SpringBucks Redis 快取演示專案 ⚡
+# cache-with-redis-demo
 
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
+> Spring Cache abstraction with Redis backend for distributed caching
+
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Redis](https://img.shields.io/badge/Redis-Cache-red.svg)](https://redis.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/)
+[![Spring Cache](https://img.shields.io/badge/Spring%20Cache-Abstraction-blue.svg)](https://spring.io/guides/gs/caching/)
+[![Redis](https://img.shields.io/badge/Redis-latest-red.svg)](https://redis.io/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 專案介紹
+A comprehensive demonstration of **Spring Cache abstraction with Redis** as cache provider, featuring declarative caching with `@Cacheable`, automatic TTL expiration, and distributed cache management for cluster deployments.
 
-SpringBucks 是一個基於 Spring Boot 3.x 的咖啡店管理系統演示專案，主要展示如何在企業級應用中整合 Redis 快取機制。本專案模擬真實的咖啡店業務場景，包含咖啡商品管理、訂單處理等核心功能，並透過 Redis 提供高效能的資料快取服務。
+## Features
 
-### 核心功能
-- **咖啡商品管理**：支援咖啡品項的 CRUD 操作
-- **訂單管理系統**：完整的訂單生命週期管理
-- **Redis 快取整合**：提升資料查詢效能
-- **金額處理**：使用 Joda Money 確保金額計算的精確性
-- **資料持久化**：透過 JPA 與 H2 資料庫整合
+- Spring Cache abstraction (declarative caching)
+- Redis as distributed cache backend
+- `@EnableCaching` to enable cache support
+- `@Cacheable` for method result caching
+- `@CacheEvict` for cache invalidation
+- `@CacheConfig` for class-level cache configuration
+- Automatic TTL expiration (5 seconds demo)
+- Spring Data Redis integration
+- RedisCacheManager auto-configuration
+- Cache hit/miss observation via SQL logging
+- Suitable for multi-node cluster deployments
+- Cache consistency across all nodes
+- Actuator metrics for cache monitoring
 
-> 💡 **為什麼選擇此專案？**
-> - 展示現代化的 Spring Boot 3.x 架構設計
-> - 實際演示 Redis 快取策略的最佳實踐
-> - 提供完整的企業級開發範例
-> - 適合學習微服務架構中的快取機制
+## Tech Stack
 
-### 🎯 專案特色
+- Spring Boot 3.4.5
+- Spring Cache (abstraction layer)
+- Spring Data Redis (Redis integration)
+- Spring Boot Actuator (metrics)
+- Redis (distributed cache)
+- Spring Data JPA
+- Java 21
+- H2 Database 2.3.232
+- Joda Money 2.0.2
+- Lombok
+- Maven 3.8+
 
-- **高效能快取**：使用 Redis 實現多層快取策略，大幅提升查詢效能
-- **精確金額處理**：整合 Joda Money 庫，確保財務計算的準確性
-- **現代化架構**：採用 Spring Boot 3.4.5 + Java 21 的最新技術棧
-- **清晰的程式碼結構**：遵循 DDD 設計模式，易於維護和擴展
-- **完整的快取管理**：支援快取失效、更新等完整生命週期管理
+## Getting Started
 
-## 技術棧
+### Prerequisites
 
-### 核心框架
-- **Spring Boot 3.4.5** - 企業級應用開發框架
-- **Spring Data JPA** - 資料持久化與 ORM 解決方案
-- **Spring Cache** - 宣告式快取抽象層
-- **Spring Data Redis** - Redis 整合與操作框架
+- JDK 21 or higher
+- Maven 3.8+ (or use included Maven Wrapper)
+- Docker (for Redis)
 
-### 資料儲存與快取
-- **Redis** - 高效能記憶體快取資料庫
-- **H2 Database** - 內嵌式關聯資料庫（開發用）
-- **Hibernate** - JPA 實作與 ORM 框架
+### Quick Start
 
-### 開發工具與輔助
-- **Lombok** - 簡化 Java 程式碼開發
-- **Joda Money** - 專業的金額處理函式庫
-- **Maven** - 專案構建與依賴管理工具
-- **JUnit 5** - 單元測試框架
+**Step 1: Start Redis**
 
-## 專案結構
-
-```
-cache-with-redis-demo/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── tw/fengqing/spring/springbucks/
-│   │   │       ├── model/              # 實體類別與領域模型
-│   │   │       │   ├── BaseEntity.java       # 基礎實體類別
-│   │   │       │   ├── Coffee.java           # 咖啡商品實體
-│   │   │       │   ├── CoffeeOrder.java      # 訂單實體
-│   │   │       │   ├── OrderState.java       # 訂單狀態枚舉
-│   │   │       │   └── MoneyConverter.java   # 金額轉換器
-│   │   │       ├── repository/         # 資料存取層
-│   │   │       │   ├── CoffeeRepository.java
-│   │   │       │   └── CoffeeOrderRepository.java
-│   │   │       ├── service/            # 業務邏輯層
-│   │   │       │   ├── CoffeeService.java     # 咖啡服務（含快取）
-│   │   │       │   └── CoffeeOrderService.java
-│   │   │       └── SpringBucksApplication.java # 主程式進入點
-│   │   └── resources/
-│   │       ├── application.properties   # 應用程式配置
-│   │       ├── schema.sql              # 資料庫結構定義
-│   │       └── data.sql                # 初始資料
-│   └── test/
-│       └── java/                       # 測試程式碼
-├── pom.xml                            # Maven 專案配置
-└── README.md                          # 專案說明文件
-```
-
-## 快速開始
-
-### 前置需求
-- **Java 21** 或更高版本
-- **Maven 3.6** 或更高版本
-- **Redis Server** （本機執行或 Docker）
-- **IDE**：建議使用 IntelliJ IDEA 或 Eclipse
-
-### 安裝與執行
-
-1. **克隆此倉庫：**
 ```bash
-git clone https://github.com/SpringMicroservicesCourse/cache-with-redis-demo.git
+# Using Docker Compose (recommended)
+docker-compose up -d
+
+# Or using docker run
+docker run -d \
+  --name redis-spring-course \
+  -p 6379:6379 \
+  redis
 ```
 
-2. **進入專案目錄：**
+**Step 2: Verify Redis**
+
 ```bash
-cd cache-with-redis-demo
+# Test Redis connection
+docker exec -it redis-spring-course redis-cli ping
+# Expected: PONG
 ```
 
-3. **啟動 Redis 服務：**
+**Step 3: Run the application**
+
 ```bash
-# 使用 Docker（推薦）
-docker run --name redis-cache -p 6379:6379 -d redis:latest
-
-# 或使用本機安裝的 Redis
-redis-server
+./mvnw spring-boot:run
 ```
 
-4. **編譯專案：**
-```bash
-mvn clean compile
-```
+## Configuration
 
-5. **執行應用程式：**
-```bash
-mvn spring-boot:run
-```
+### Application Properties
 
-6. **驗證執行狀態：**
-   - 應用程式啟動後會自動執行示範程式
-   - 觀察控制台輸出，可以看到快取機制的運作情況
-   - 首次查詢會從資料庫載入，後續查詢會從 Redis 快取取得
-
-## 進階說明
-
-### 環境變數
 ```properties
-# Redis 連線設定
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=your-password
+# JPA/Hibernate configuration
+spring.jpa.hibernate.ddl-auto=none
+spring.jpa.properties.hibernate.show_sql=true
+spring.jpa.properties.hibernate.format_sql=true
 
-# 快取設定
-CACHE_TTL=5000
-CACHE_NAMES=coffee
+# Actuator endpoints (for metrics)
+management.endpoints.web.exposure.include=*
 
-# 資料庫設定
-DB_URL=jdbc:h2:mem:testdb
+# Spring Cache configuration
+spring.cache.type=redis                        # Use Redis as cache provider
+spring.cache.cache-names=coffee                # Pre-create cache named "coffee"
+spring.cache.redis.time-to-live=5000           # TTL: 5 seconds (5000ms)
+spring.cache.redis.cache-null-values=false     # Don't cache null values
+
+# Redis connection configuration
+spring.redis.host=localhost
 ```
 
-### 設定檔說明
-```properties
-# application.properties 主要設定
+**Configuration Explanation:**
 
-# JPA 與 Hibernate 設定
-spring.jpa.hibernate.ddl-auto=none          # 不自動建立資料表
-spring.jpa.properties.hibernate.show_sql=true    # 顯示 SQL 語句
-spring.jpa.properties.hibernate.format_sql=true  # 格式化 SQL 輸出
+- **spring.cache.type=redis**:
+  - Specifies Redis as cache implementation
+  - Spring Boot auto-configures `RedisCacheManager`
+  
+- **spring.cache.cache-names=coffee**:
+  - Pre-creates cache named "coffee"
+  - Can configure multiple: `coffee,menu,order`
+  
+- **spring.cache.redis.time-to-live=5000**:
+  - Sets cache TTL to 5 seconds (milliseconds)
+  - Cache automatically expires after 5 seconds
+  
+- **spring.cache.redis.cache-null-values=false**:
+  - Don't cache null values (prevents cache penetration)
 
-# 監控端點設定
-management.endpoints.web.exposure.include=*      # 開放所有監控端點
+### Docker Compose
 
-# Redis 快取設定
-spring.cache.type=redis                     # 指定快取類型為 Redis
-spring.cache.cache-names=coffee             # 定義快取命名空間
-spring.cache.redis.time-to-live=5000        # 快取存活時間（毫秒）
-spring.cache.redis.cache-null-values=false  # 不快取 null 值
+**docker-compose.yml:**
 
-# Redis 連線設定
-spring.redis.host=localhost                 # Redis 伺服器位址
+```yaml
+services:
+  redis-spring-course:
+    image: redis
+    container_name: redis-spring-course
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
 ```
 
-### 快取機制說明
+## Usage
 
-本專案在 `CoffeeService` 中實作了兩個重要的快取註解：
+### Application Flow
+
+```
+1. Spring Boot starts
+   ↓
+2. @EnableCaching activates cache support
+   ↓
+3. RedisCacheManager auto-configured
+   ↓
+4. H2 database initialized with schema.sql
+   - Creates t_coffee table
+   - Inserts 5 coffee records
+   ↓
+5. ApplicationRunner executes:
+   - First call to findAllCoffee() → SQL executed, result cached to Redis (TTL=5s)
+   - Next 5 calls (within 5s) → Cache hit, no SQL
+   - Sleep 5 seconds → Cache expires
+   - Next call → SQL executed again, result cached
+```
+
+### Code Example
 
 ```java
-// 查詢結果會被快取到 "coffee" 命名空間
-@Cacheable("coffee")
-public List<Coffee> findAllCoffee() {
-    return coffeeRepository.findAll();
-}
-
-// 清除 "coffee" 命名空間的所有快取
-@CacheEvict("coffee")
-public void reloadCoffee() {
+@Slf4j
+@SpringBootApplication
+@EnableJpaRepositories
+@EnableCaching(proxyTargetClass = true)  // Enable caching!
+public class SpringBucksApplication implements ApplicationRunner {
+    
+    @Autowired
+    private CoffeeService coffeeService;
+    
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        // First call: Executes SQL, caches result (TTL=5s)
+        log.info("Count: {}", coffeeService.findAllCoffee().size());
+        
+        // Next 5 calls: Cache hit, no SQL
+        for (int i = 0; i < 5; i++) {
+            log.info("Reading from cache.");
+            coffeeService.findAllCoffee();
+        }
+        
+        // Wait for TTL expiration
+        Thread.sleep(5_000);
+        
+        // After TTL expired: Executes SQL again
+        log.info("Reading after refresh.");
+        coffeeService.findAllCoffee().forEach(c -> log.info("Coffee {}", c.getName()));
+    }
 }
 ```
 
-### 金額處理機制
+### Sample Output
 
-使用自定義的 `MoneyConverter` 來處理 Joda Money 與資料庫之間的轉換：
+```
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.create_time,
+        c1_0.name,
+        c1_0.price,
+        c1_0.update_time 
+    from
+        t_coffee c1_0
+
+Count: 5
+Reading from cache.
+Reading from cache.
+Reading from cache.
+Reading from cache.
+Reading from cache.
+
+# (5 seconds pass - cache expires)
+
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.create_time,
+        c1_0.name,
+        c1_0.price,
+        c1_0.update_time 
+    from
+        t_coffee c1_0
+
+Reading after refresh.
+Coffee espresso
+Coffee latte
+Coffee capuccino
+Coffee mocha
+Coffee macchiato
+```
+
+**Output Analysis:**
+- **First SQL**: Initial query, result cached to Redis (TTL=5s)
+- **5 cache hits**: No SQL statements (reading from Redis cache)
+- **5 seconds sleep**: Waiting for TTL expiration
+- **Second SQL**: After TTL expired, cache invalidated, query executes again
+
+## Key Components
+
+### CoffeeService (with Caching)
 
 ```java
-@Converter(autoApply = true)
-public class MoneyConverter implements AttributeConverter<Money, Long> {
-    // 將 Money 物件轉換為資料庫的長整數值（以分為單位）
-    // 將資料庫值轉換回 Money 物件
+@Slf4j
+@Service
+@CacheConfig(cacheNames = "coffee")  // Class-level cache configuration
+public class CoffeeService {
+    
+    @Autowired
+    private CoffeeRepository coffeeRepository;
+    
+    /**
+     * Find all coffees from database
+     * @Cacheable: Result will be cached to Redis
+     * - First call: Executes method, caches result with TTL
+     * - Subsequent calls (before TTL): Returns cached result, method not executed
+     * - After TTL expires: Cache invalidated, method executes again
+     */
+    @Cacheable
+    public List<Coffee> findAllCoffee() {
+        return coffeeRepository.findAll();
+    }
+    
+    /**
+     * Reload coffee data
+     * @CacheEvict: Clears the cache
+     * - Next call to findAllCoffee() will execute query again
+     */
+    @CacheEvict
+    public void reloadCoffee() {
+        // Method body can be empty
+        // Calling this method triggers cache eviction
+    }
+    
+    /**
+     * Find coffee by name (NOT cached)
+     */
+    public Optional<Coffee> findOneCoffee(String name) {
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withMatcher("name", exact().ignoreCase());
+        Optional<Coffee> coffee = coffeeRepository.findOne(
+                Example.of(Coffee.builder().name(name).build(), matcher));
+        log.info("Coffee Found: {}", coffee);
+        return coffee;
+    }
 }
 ```
 
-## 參考資源
+**Annotation Explanation:**
 
-- [Spring Boot 官方文件](https://spring.io/projects/spring-boot)
-- [Spring Data Redis 參考指南](https://docs.spring.io/spring-data/redis/docs/current/reference/html/)
-- [Redis 官方文件](https://redis.io/documentation)
-- [Joda Money 使用指南](https://www.joda.org/joda-money/)
+- **@CacheConfig(cacheNames = "coffee")**:
+  - Defines cache name at class level
+  - All cache annotations in this class inherit this configuration
+  
+- **@Cacheable**:
+  - No `key` specified → Uses method parameters as key
+  - `findAllCoffee()` has no parameters → Default key is `SimpleKey.EMPTY`
+  - Cache check flow:
+    1. Check if cache exists for key in Redis
+    2. If exists and not expired: Return cached value (method not executed)
+    3. If not exists or expired: Execute method, cache result with TTL
+  
+- **@CacheEvict**:
+  - Clears all entries in "coffee" cache from Redis
+  - Executed after method completes (default behavior)
 
-## 注意事項與最佳實踐
+### Main Application
 
-### ⚠️ 重要提醒
+```java
+@Slf4j
+@EnableTransactionManagement
+@SpringBootApplication
+@EnableJpaRepositories
+@EnableCaching(proxyTargetClass = true)  // MUST enable caching!
+public class SpringBucksApplication implements ApplicationRunner {
+    
+    @Autowired
+    private CoffeeService coffeeService;
+    
+    public static void main(String[] args) {
+        SpringApplication.run(SpringBucksApplication.class, args);
+    }
+    
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        log.info("Count: {}", coffeeService.findAllCoffee().size());
+        for (int i = 0; i < 5; i++) {
+            log.info("Reading from cache.");
+            coffeeService.findAllCoffee();
+        }
+        Thread.sleep(5_000);  // Wait for TTL expiration
+        log.info("Reading after refresh.");
+        coffeeService.findAllCoffee().forEach(c -> log.info("Coffee {}", c.getName()));
+    }
+}
+```
 
-| 項目 | 說明 | 建議做法 |
-|------|------|----------|
-| Redis 連線 | 生產環境需要設定密碼 | 使用環境變數管理敏感資訊 |
-| 快取策略 | 避免快取過大的物件 | 合理設定 TTL 和記憶體限制 |
-| 金額精度 | 使用 Joda Money 避免浮點數誤差 | 統一使用最小貨幣單位儲存 |
-| 資料一致性 | 注意快取與資料庫的同步 | 適當使用 @CacheEvict 清除快取 |
+**Important:**
+- `@EnableCaching` is **required** - without it, cache annotations won't work
+- `proxyTargetClass = true` uses CGLIB proxying (recommended)
 
-### 🔒 最佳實踐指南
+### Database Schema
 
-- **快取命名**：使用有意義的快取命名空間，避免衝突
-- **TTL 設定**：根據業務需求合理設定快取存活時間
-- **異常處理**：Redis 連線失敗時應有適當的降級機制
-- **監控告警**：監控快取命中率和 Redis 效能指標
-- **資料一致性**：在更新資料時及時清除相關快取
+**schema.sql:**
 
-### 效能優化建議
+```sql
+drop table t_coffee if exists;
+drop table t_order if exists;
+drop table t_order_coffee if exists;
 
-1. **快取預熱**：應用啟動時載入熱點資料到快取
-2. **分層快取**：結合本地快取和 Redis 快取
-3. **批次操作**：使用 Redis Pipeline 提升批次操作效能
-4. **連線池**：合理配置 Redis 連線池參數
+create table t_coffee (
+    id bigint auto_increment,
+    create_time timestamp,
+    update_time timestamp,
+    name varchar(255),
+    price bigint,              -- Stored in cents
+    primary key (id)
+);
 
-## 授權說明
+create table t_order (
+    id bigint auto_increment,
+    create_time timestamp,
+    update_time timestamp,
+    customer varchar(255),
+    state integer not null,
+    primary key (id)
+);
 
-本專案採用 MIT 授權條款，詳見 LICENSE 檔案。
+create table t_order_coffee (
+    coffee_order_id bigint not null,
+    items_id bigint not null
+);
 
-## 關於我們
+-- Initial data (5 coffees)
+insert into t_coffee (name, price, create_time, update_time) 
+    values ('espresso', 10000, now(), now());
+insert into t_coffee (name, price, create_time, update_time) 
+    values ('latte', 12500, now(), now());
+insert into t_coffee (name, price, create_time, update_time) 
+    values ('capuccino', 12500, now(), now());
+insert into t_coffee (name, price, create_time, update_time) 
+    values ('mocha', 15000, now(), now());
+insert into t_coffee (name, price, create_time, update_time) 
+    values ('macchiato', 15000, now(), now());
+```
 
-我們主要專注在敏捷專案管理、物聯網（IoT）應用開發和領域驅動設計（DDD）。喜歡把先進技術和實務經驗結合，打造好用又靈活的軟體解決方案。
+## Redis Cache Verification
 
-## 聯繫我們
+### Verify Cache Data
 
-- **FB 粉絲頁**：[風清雲談 | Facebook](https://www.facebook.com/profile.php?id=61576838896062)
-- **LinkedIn**：[linkedin.com/in/chu-kuo-lung](https://www.linkedin.com/in/chu-kuo-lung)
-- **YouTube 頻道**：[雲談風清 - YouTube](https://www.youtube.com/channel/UCXDqLTdCMiCJ1j8xGRfwEig)
-- **風清雲談 部落格**：[風清雲談](https://blog.fengqing.tw/)
-- **電子郵件**：[fengqing.tw@gmail.com](mailto:fengqing.tw@gmail.com)
+```bash
+# Connect to Redis
+docker exec -it redis-spring-course redis-cli
+
+# View all keys
+127.0.0.1:6379> KEYS *
+1) "coffee::SimpleKey []"
+
+# Check key type
+127.0.0.1:6379> TYPE "coffee::SimpleKey []"
+string
+
+# View cache value (serialized, not human-readable)
+127.0.0.1:6379> GET "coffee::SimpleKey []"
+"\xac\xed\x00\x05sr\x00\x13java.util.ArrayList..."
+
+# Check TTL (remaining time)
+127.0.0.1:6379> TTL "coffee::SimpleKey []"
+(integer) 3  # 3 seconds remaining
+
+# Wait 5 seconds, then check again
+127.0.0.1:6379> KEYS *
+(empty array)  # Cache expired and deleted
+
+# Exit
+127.0.0.1:6379> exit
+```
+
+### Cache Key Format
+
+**Format:** `{cacheName}::{key}`
+
+**Example:** `coffee::SimpleKey []`
+- `coffee`: Cache name (from `@CacheConfig(cacheNames = "coffee")`)
+- `::`: Separator
+- `SimpleKey []`: Cache key (no method parameters, uses `SimpleKey.EMPTY`)
+
+### Redis Monitoring
+
+**Real-time Monitor:**
+
+```bash
+# Monitor all Redis commands
+docker exec -it redis-spring-course redis-cli MONITOR
+
+# After starting Spring Boot app, you'll see:
+# 1697012345.123456 [0 127.0.0.1:12345] "GET" "coffee::SimpleKey []"
+# 1697012345.234567 [0 127.0.0.1:12345] "SETEX" "coffee::SimpleKey []" "5" "\xac\xed..."
+# 1697012345.345678 [0 127.0.0.1:12345] "GET" "coffee::SimpleKey []"
+# ... (5 GET commands, all hit cache)
+```
+
+**Observation Points:**
+- First call: `GET` miss → `SETEX` writes to cache with TTL
+- Next 5 calls: `GET` hits cache
+- After 5 seconds: Cache expires, next `GET` misses → `SETEX` again
+
+## Spring Cache Annotations
+
+### @EnableCaching
+
+**Purpose:** Enable Spring Cache support
+
+```java
+@SpringBootApplication
+@EnableCaching(proxyTargetClass = true)
+public class SpringBucksApplication {
+    // ...
+}
+```
+
+**Parameters:**
+- `proxyTargetClass = true`: Use CGLIB proxy (default is JDK dynamic proxy)
+- **MUST add this annotation**, otherwise cache annotations won't work
+
+**How It Works:**
+- Spring uses **AOP (Aspect-Oriented Programming)** to implement caching
+- Intercepts methods annotated with cache annotations
+- Adds cache logic before and after method execution
+
+### @Cacheable
+
+**Purpose:** Cache method result
+
+```java
+@Cacheable(
+    cacheNames = "coffee",           // Cache name (required)
+    key = "#id",                     // Cache key (SpEL expression)
+    condition = "#id > 0",           // Cache condition
+    unless = "#result == null"       // Exclusion condition (don't cache if null)
+)
+public Coffee findCoffee(Long id) {
+    return coffeeRepository.findById(id).orElse(null);
+}
+```
+
+**Execution Flow:**
+1. Check if cache exists for key in Redis
+2. **Exists**: Return cached value, don't execute method
+3. **Not exists**: Execute method, cache result with TTL, return value
+
+**SpEL Expressions:**
+- `#id`: Method parameter `id`
+- `#result`: Method return value
+- `#root.methodName`: Method name
+- `#root.target`: Target object
+
+### @CacheEvict
+
+**Purpose:** Clear cache
+
+```java
+@CacheEvict(
+    cacheNames = "coffee",
+    key = "#id",                     // Clear specific key
+    allEntries = true,               // Clear all entries
+    beforeInvocation = false         // Evict after method execution (default)
+)
+public void deleteCoffee(Long id) {
+    coffeeRepository.deleteById(id);
+}
+```
+
+**Use Cases:**
+- After data update → Clear cache
+- Scheduled cache refresh
+- Manual cache invalidation
+
+### @CachePut
+
+**Purpose:** Force cache update (always execute method)
+
+```java
+@CachePut(cacheNames = "coffee", key = "#coffee.id")
+public Coffee updateCoffee(Coffee coffee) {
+    return coffeeRepository.save(coffee);
+}
+```
+
+**Difference from @Cacheable:**
+- `@Cacheable`: Cache hit → Don't execute method
+- `@CachePut`: Always execute method → Update cache
+
+### @Caching
+
+**Purpose:** Combine multiple cache operations
+
+```java
+@Caching(
+    cacheable = {
+        @Cacheable(cacheNames = "coffee", key = "#id")
+    },
+    put = {
+        @CachePut(cacheNames = "coffee-list", key = "'all'")
+    },
+    evict = {
+        @CacheEvict(cacheNames = "old-coffee", key = "#id")
+    }
+)
+public Coffee complexCacheOperation(Long id) {
+    return coffeeRepository.findById(id).orElse(null);
+}
+```
+
+### @CacheConfig
+
+**Purpose:** Class-level cache configuration
+
+```java
+@Service
+@CacheConfig(cacheNames = "coffee")  // Class-level configuration
+public class CoffeeService {
+    
+    @Cacheable  // Inherits cacheNames from @CacheConfig
+    public List<Coffee> findAllCoffee() {
+        return coffeeRepository.findAll();
+    }
+    
+    @CacheEvict  // Inherits cacheNames from @CacheConfig
+    public void reloadCoffee() {
+    }
+}
+```
+
+## Cache vs cache-demo
+
+| Feature | cache-demo | cache-with-redis-demo |
+|---------|------------|----------------------|
+| Cache Provider | ConcurrentHashMap | Redis |
+| Distribution | ❌ Single-node | ✅ Multi-node |
+| Persistence | ❌ Lost on restart | ✅ Optional persistence |
+| TTL Support | ❌ No | ✅ Yes (auto-expiration) |
+| External Service | ❌ Not required | ✅ Requires Redis |
+| Cache Consistency | ❌ Each node independent | ✅ All nodes share same cache |
+| Use Case | Dev/testing | Production cluster |
+| Code Changes | None! | None! (Same code) |
+
+**Key Insight:** Code is **identical** between `cache-demo` and `cache-with-redis-demo`! Only configuration changes.
+
+## Monitoring
+
+### Actuator Cache Metrics
+
+**View available cache metrics:**
+
+```bash
+# List all cache-related metrics
+curl http://localhost:8080/actuator/metrics | jq '.names[] | select(startswith("cache"))'
+
+# Output:
+# "cache.gets"        # Cache get requests
+# "cache.puts"        # Cache put requests
+# "cache.evictions"   # Cache evictions
+# "cache.size"        # Cache size
+```
+
+### Cache Hit/Miss Statistics
+
+**View cache.gets metric:**
+
+```bash
+curl http://localhost:8080/actuator/metrics/cache.gets
+```
+
+**Output:**
+
+```json
+{
+  "name": "cache.gets",
+  "description": "The number of pending requests",
+  "measurements": [
+    {
+      "statistic": "COUNT",
+      "value": 0
+    }
+  ],
+  "availableTags": [
+    {
+      "tag": "result",
+      "values": ["hit", "pending", "miss"]
+    },
+    {
+      "tag": "cache.manager",
+      "values": ["cacheManager"]
+    },
+    {
+      "tag": "cache",
+      "values": ["coffee"]
+    }
+  ]
+}
+```
+
+**Query hit count:**
+
+```bash
+curl http://localhost:8080/actuator/metrics/cache.gets?tag=result:hit&tag=cache:coffee
+
+# Output:
+# {
+#   "name": "cache.gets",
+#   "measurements": [{"statistic": "COUNT", "value": 15.0}]
+# }
+```
+
+**Query miss count:**
+
+```bash
+curl http://localhost:8080/actuator/metrics/cache.gets?tag=result:miss&tag=cache:coffee
+
+# Output:
+# {
+#   "name": "cache.gets",
+#   "measurements": [{"statistic": "COUNT", "value": 3.0}]
+# }
+```
+
+**Calculate hit rate:**
+
+```bash
+# Hit rate = 15 / (15 + 3) × 100% = 83.33%
+```
+
+### Cache Statistics Script
+
+**cache-stats.sh:**
+
+```bash
+#!/bin/bash
+# Cache statistics script
+
+ACTUATOR_URL="http://localhost:8080/actuator/metrics"
+
+get_metric() {
+    local metric=$1
+    local tags=$2
+    curl -s "${ACTUATOR_URL}/${metric}?${tags}" | jq '.measurements[0].value'
+}
+
+echo "=== Coffee Cache Statistics ==="
+
+HIT=$(get_metric "cache.gets" "tag=result:hit&tag=cache:coffee")
+MISS=$(get_metric "cache.gets" "tag=result:miss&tag=cache:coffee")
+PUTS=$(get_metric "cache.puts" "tag=cache:coffee")
+EVICTIONS=$(get_metric "cache.evictions" "tag=cache:coffee")
+
+echo "Hits: $HIT"
+echo "Misses: $MISS"
+echo "Puts: $PUTS"
+echo "Evictions: $EVICTIONS"
+
+if [ "$HIT" != "null" ] && [ "$MISS" != "null" ]; then
+    TOTAL=$(echo "$HIT + $MISS" | bc)
+    if [ "$TOTAL" != "0" ]; then
+        HIT_RATE=$(echo "scale=2; $HIT / $TOTAL * 100" | bc)
+        echo "Hit Rate: ${HIT_RATE}%"
+    fi
+fi
+```
+
+**Usage:**
+
+```bash
+chmod +x cache-stats.sh
+./cache-stats.sh
+```
+
+**Sample Output:**
+
+```
+=== Coffee Cache Statistics ===
+Hits: 45
+Misses: 5
+Puts: 5
+Evictions: 0
+Hit Rate: 90.00%
+```
+
+### Redis Monitoring
+
+**Database Statistics:**
+
+```bash
+docker exec -it redis-spring-course redis-cli
+
+127.0.0.1:6379> DBSIZE
+(integer) 1
+
+127.0.0.1:6379> INFO keyspace
+# Keyspace
+db0:keys=1,expires=0,avg_ttl=0
+```
+
+**Memory Usage:**
+
+```bash
+docker exec -it redis-spring-course redis-cli INFO memory
+
+# Output:
+# used_memory_human:1.5M
+# used_memory_peak_human:2.0M
+# mem_fragmentation_ratio:1.5
+```
+
+## Spring Cache Best Practices
+
+### 1. Cacheable Best Practices
+
+```java
+// ✅ Recommended: Specify key and unless
+@Cacheable(
+    cacheNames = "coffee",
+    key = "#id",
+    unless = "#result == null"  // Don't cache null
+)
+public Coffee findCoffee(Long id) {
+    return coffeeRepository.findById(id).orElse(null);
+}
+
+// ✅ Recommended: Use condition to control caching
+@Cacheable(
+    cacheNames = "coffee",
+    key = "#name",
+    condition = "#name != null && #name.length() > 0"
+)
+public Coffee findByName(String name) {
+    return coffeeRepository.findByName(name);
+}
+
+// ❌ Not recommended: Cache complex parameter methods
+@Cacheable(cacheNames = "order")
+public List<Order> findOrders(OrderQuery query) {  // Complex object as key
+    // May cause long keys or serialization issues
+}
+```
+
+### 2. CacheEvict Best Practices
+
+```java
+// ✅ Recommended: Clear cache after update
+@CacheEvict(cacheNames = "coffee", key = "#coffee.id")
+public Coffee updateCoffee(Coffee coffee) {
+    return coffeeRepository.save(coffee);
+}
+
+// ✅ Recommended: Clear multiple related caches
+@CacheEvict(cacheNames = {"coffee", "menu"}, allEntries = true)
+public void refreshAllCaches() {
+}
+
+// ✅ Recommended: Evict before method execution
+@CacheEvict(
+    cacheNames = "coffee",
+    beforeInvocation = true  // Evict before method execution
+)
+public void deleteCoffee(Long id) {
+    coffeeRepository.deleteById(id);
+    // If delete fails, cache already cleared, avoids dirty data
+}
+```
+
+### 3. TTL Configuration
+
+**Test different TTLs:**
+
+```properties
+# Test 1: 10 seconds TTL
+spring.cache.redis.time-to-live=10000
+
+# Test 2: Never expire (not recommended)
+spring.cache.redis.time-to-live=0
+
+# Test 3: 1 hour
+spring.cache.redis.time-to-live=3600000
+
+# Test 4: 10 minutes (production)
+spring.cache.redis.time-to-live=600000
+```
+
+### 4. Advanced Configuration (Programmatic)
+
+```java
+@Configuration
+@EnableCaching
+public class CacheConfig {
+    
+    @Bean
+    public RedisCacheConfiguration redisCacheConfiguration() {
+        return RedisCacheConfiguration.defaultCacheConfig()
+                // Set TTL
+                .entryTtl(Duration.ofMinutes(10))
+                // Don't cache null values
+                .disableCachingNullValues()
+                // Set key serialization
+                .serializeKeysWith(
+                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                new StringRedisSerializer()))
+                // Set value serialization (JSON)
+                .serializeValuesWith(
+                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                new GenericJackson2JsonRedisSerializer()));
+    }
+    
+    @Bean
+    public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
+        // Different TTL for different caches
+        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+        
+        // coffee cache: 10 minutes
+        cacheConfigurations.put("coffee",
+                RedisCacheConfiguration.defaultCacheConfig()
+                        .entryTtl(Duration.ofMinutes(10)));
+        
+        // menu cache: 30 minutes
+        cacheConfigurations.put("menu",
+                RedisCacheConfiguration.defaultCacheConfig()
+                        .entryTtl(Duration.ofMinutes(30)));
+        
+        return RedisCacheManager.builder(factory)
+                .cacheDefaults(redisCacheConfiguration())
+                .withInitialCacheConfigurations(cacheConfigurations)
+                .build();
+    }
+}
+```
+
+## Testing
+
+### Disable Cache for Testing
+
+```properties
+# Disable cache in test environment
+spring.cache.type=none
+```
+
+### Clear Cache in Tests
+
+```java
+@SpringBootTest
+public class CoffeeServiceTest {
+    
+    @Autowired
+    private CacheManager cacheManager;
+    
+    @BeforeEach
+    public void clearCache() {
+        cacheManager.getCacheNames().forEach(name -> 
+                cacheManager.getCache(name).clear());
+    }
+    
+    @Test
+    public void testFindCoffee() {
+        // Test logic
+    }
+}
+```
+
+### Run Tests
+
+```bash
+# Run tests
+./mvnw test
+
+# Run application
+./mvnw spring-boot:run
+```
+
+## Common Issues
+
+### Issue 1: Cache Not Working
+
+**Symptoms:** SQL still executes on every call
+
+**Possible Causes:**
+1. ❌ Missing `@EnableCaching`
+2. ❌ Redis not running
+3. ❌ Method is `private` (AOP can't intercept)
+4. ❌ Internal call (not through Spring proxy)
+
+**Solutions:**
+
+```java
+// ✅ Ensure @EnableCaching
+@SpringBootApplication
+@EnableCaching
+public class Application { }
+
+// ✅ Check Redis status
+docker ps | grep redis
+
+// ✅ Method must be public
+public List<Coffee> findAllCoffee() { }
+
+// ✅ Call through injected bean
+@Autowired
+private CoffeeService coffeeService;  // Not this.method()
+```
+
+### Issue 2: Redis Connection Failed
+
+**Error:**
+
+```
+io.lettuce.core.RedisConnectionException: Unable to connect to localhost:6379
+```
+
+**Solutions:**
+
+```bash
+# Check if Redis is running
+docker ps | grep redis
+
+# Start Redis if not running
+docker start redis-spring-course
+
+# Or start new Redis container
+docker-compose up -d
+
+# Test connection
+docker exec -it redis-spring-course redis-cli ping
+```
+
+### Issue 3: Cache Expires Too Fast
+
+**Symptoms:** Every query hits database (low hit rate)
+
+**Cause:** TTL set too short (5 seconds is for demo only)
+
+**Solution:**
+
+```properties
+# Production: Use longer TTL
+spring.cache.redis.time-to-live=600000  # 10 minutes
+
+# Or disable TTL
+spring.cache.redis.time-to-live=0  # Never expire (use with caution)
+```
+
+### Issue 4: Serialization Error
+
+**Error:**
+
+```
+org.springframework.data.redis.serializer.SerializationException: 
+Cannot deserialize
+```
+
+**Cause:** Entity class doesn't implement `Serializable`
+
+**Solution:**
+
+```java
+// Add Serializable to BaseEntity
+@MappedSuperclass
+public class BaseEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+    // ...
+}
+```
+
+## Cache Strategy Comparison
+
+### In-Memory vs Distributed Cache
+
+**In-Memory Cache (ConcurrentHashMap):**
+
+```
+App A cache: espresso = $1.00
+App B cache: espresso = $1.00
+Update database: espresso = $1.20
+Clear App A cache: espresso reloads as $1.20
+App B cache: Still $1.00 (inconsistent!)
+```
+
+**Distributed Cache (Redis):**
+
+```
+Apps A, B, C all access same Redis
+Update database: espresso = $1.20
+Clear Redis cache
+All apps next access: Get $1.20 (consistent!)
+```
+
+### When to Use Redis Cache
+
+**✅ Use Redis Cache:**
+- Cluster deployment (multiple nodes)
+- Need cache consistency across nodes
+- Need to share cache between applications
+- Need TTL auto-expiration
+- Data changes moderately
+- Need cache persistence (optional)
+
+**❌ Use In-Memory Cache:**
+- Single-node deployment
+- Data rarely changes
+- Can tolerate short-term inconsistency
+- Small cache data size
+
+## Performance Optimization
+
+### Cache Warm-up
+
+```java
+@Component
+public class CacheWarmer implements ApplicationRunner {
+    
+    @Autowired
+    private CoffeeService coffeeService;
+    
+    @Override
+    public void run(ApplicationArguments args) {
+        // Warm up cache on application startup
+        coffeeService.findAllCoffee();
+        log.info("Cache warmed up");
+    }
+}
+```
+
+### Two-Level Cache
+
+```java
+@Configuration
+@EnableCaching
+public class CacheConfig {
+    
+    @Primary
+    @Bean
+    public CacheManager cacheManager(
+            CacheManager caffeineCacheManager,
+            CacheManager redisCacheManager) {
+        
+        // Combine two CacheManagers
+        return new CompositeCacheManager(
+                caffeineCacheManager,  // L1: In-memory cache (fast)
+                redisCacheManager      // L2: Redis cache (distributed)
+        );
+    }
+}
+```
+
+### Random TTL (Prevent Cache Avalanche)
+
+```java
+@Bean
+public RedisCacheConfiguration redisCacheConfiguration() {
+    // Base TTL: 10 minutes
+    long baseTtl = 600;
+    // Random range: ± 60 seconds
+    long randomTtl = ThreadLocalRandom.current().nextLong(-60, 60);
+    
+    return RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofSeconds(baseTtl + randomTtl));
+}
+```
+
+## Best Practices Demonstrated
+
+1. **Declarative Caching**: Using annotations instead of programmatic caching
+2. **@CacheConfig**: Class-level cache configuration
+3. **Automatic TTL**: Redis auto-expires cache entries
+4. **Distributed Cache**: Cache consistency across cluster nodes
+5. **Actuator Metrics**: Monitor cache hit rate and performance
+6. **Cache Aside Pattern**: Standard caching strategy
+7. **SQL Logging**: Verify cache hit/miss through SQL statements
+
+## Security Configuration
+
+### Password Authentication
+
+**docker-compose.yml:**
+
+```yaml
+services:
+  redis-spring-course:
+    image: redis
+    container_name: redis-spring-course
+    ports:
+      - "127.0.0.1:6379:6379"  # Bind to localhost only
+    volumes:
+      - ./redis-data:/data
+    command: redis-server --appendonly yes --requirepass your-password
+```
+
+**application.properties:**
+
+```properties
+spring.redis.host=localhost
+spring.redis.password=your-password
+```
+
+## References
+
+- [Spring Cache Abstraction](https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#cache)
+- [Spring Boot Caching](https://docs.spring.io/spring-boot/docs/current/reference/html/io.html#io.caching)
+- [Spring Data Redis](https://docs.spring.io/spring-data/redis/docs/current/reference/html/)
+- [Redis Documentation](https://redis.io/docs/)
+- [Spring Cache Annotations](https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#cache-annotations)
+- [Micrometer Cache Metrics](https://micrometer.io/docs/concepts#_caches)
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## About Us
+
+我們主要專注在敏捷專案管理、物聯網（IoT）應用開發和領域驅動設計（DDD）。喜歡把先進技術和實務經驗結合，打造好用又靈活的軟體解決方案。近來也積極結合 AI 技術,推動自動化工作流，讓開發與運維更有效率、更智慧。持續學習與分享，希望能一起推動軟體開發的創新和進步。
+
+## Contact
+
+**風清雲談** - 專注於敏捷專案管理、物聯網（IoT）應用開發和領域驅動設計（DDD）。
+
+- 🌐 官方網站：[風清雲談部落格](https://blog.fengqing.tw/)
+- 📘 Facebook：[風清雲談粉絲頁](https://www.facebook.com/profile.php?id=61576838896062)
+- 💼 LinkedIn：[Chu Kuo-Lung](https://www.linkedin.com/in/chu-kuo-lung)
+- 📺 YouTube：[雲談風清頻道](https://www.youtube.com/channel/UCXDqLTdCMiCJ1j8xGRfwEig)
+- 📧 Email：[fengqing.tw@gmail.com](mailto:fengqing.tw@gmail.com)
 
 ---
 
-**📅 最後更新：2025-06-30**  
-**👨‍💻 維護者：風清雲談團隊** 
+**⭐ 如果這個專案對您有幫助，歡迎給個 Star！**
