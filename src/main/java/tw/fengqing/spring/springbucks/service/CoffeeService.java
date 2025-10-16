@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
@@ -17,16 +18,17 @@ import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatc
 
 @Slf4j
 @Service
+@CacheConfig(cacheNames = "coffee")
 public class CoffeeService {
     @Autowired
     private CoffeeRepository coffeeRepository;
 
-    @Cacheable("coffee")
+    @Cacheable
     public List<Coffee> findAllCoffee() {
         return coffeeRepository.findAll();
     }
 
-    @CacheEvict("coffee")
+    @CacheEvict
     public void reloadCoffee() {
     }
 

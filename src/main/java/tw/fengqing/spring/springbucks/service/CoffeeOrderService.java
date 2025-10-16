@@ -2,8 +2,6 @@ package tw.fengqing.spring.springbucks.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import tw.fengqing.spring.springbucks.model.Coffee;
 import tw.fengqing.spring.springbucks.model.CoffeeOrder;
@@ -11,7 +9,8 @@ import tw.fengqing.spring.springbucks.model.OrderState;
 import tw.fengqing.spring.springbucks.repository.CoffeeOrderRepository;
 
 import jakarta.transaction.Transactional;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @Slf4j
 @Service
@@ -23,7 +22,7 @@ public class CoffeeOrderService {
     public CoffeeOrder createOrder(String customer, Coffee...coffee) {
         CoffeeOrder order = CoffeeOrder.builder()
                 .customer(customer)
-                .items(List.of(coffee))
+                .items(new ArrayList<>(Arrays.asList(coffee)))
                 .state(OrderState.INIT)
                 .build();
         CoffeeOrder saved = orderRepository.save(order);
@@ -32,15 +31,13 @@ public class CoffeeOrderService {
     }
 
     public boolean updateState(CoffeeOrder order, OrderState state) {
-        if (order.getState() != state) {
-            log.info("Order {} , {}", order.getState(), state);
-            order.setState(state);
-            orderRepository.save(order);
-            log.info("Updated Order: {}", order);
-            return true;
-        } else {
-            log.warn("Order {} is already in state {}", order, state);
+        if (state.compareTo(order.getState()) <= 0) {
+            log.warn("Wrong State order: {}, {}", state, order.getState());
             return false;
         }
+        order.setState(state);
+        orderRepository.save(order);
+        log.info("Updated Order: {}", order);
+        return true;
     }
 }

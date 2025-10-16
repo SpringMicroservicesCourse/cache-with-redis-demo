@@ -11,6 +11,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+
 @Slf4j
 @EnableTransactionManagement
 @SpringBootApplication
@@ -23,6 +24,7 @@ public class SpringBucksApplication implements ApplicationRunner {
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBucksApplication.class, args);
 	}
+
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {

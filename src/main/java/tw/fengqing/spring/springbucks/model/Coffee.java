@@ -10,7 +10,6 @@ import org.joda.money.Money;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Convert;
-import java.io.Serializable;
 
 @Entity
 @Table(name = "T_COFFEE")
@@ -19,7 +18,7 @@ import java.io.Serializable;
 @ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Coffee extends BaseEntity implements Serializable {
+public class Coffee extends BaseEntity {
     private String name;
     @Convert(converter = MoneyConverter.class)
     private Money price;
